@@ -22,7 +22,7 @@ echo "  compile..."
 SRC=("$SRCDIR/AccountDock.swift" "$SRCDIR/AccountDockHTML.swift")
 SLICES=()
 for arch in arm64 x86_64; do
-  if swiftc -O -parse-as-library -target "$arch-apple-macos13.0" \
+  if swiftc -O -parse-as-library -target "$arch-apple-macos11.0" \
        -o "$TMP/AccountDock-$arch" "${SRC[@]}" \
        -framework AppKit -framework WebKit 2>"$TMP/err-$arch"; then
     SLICES+=("$TMP/AccountDock-$arch")
@@ -103,7 +103,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>1.0.0</string>
   <key>CFBundleVersion</key><string>1</string>
-  <key>LSMinimumSystemVersion</key><string>13.0</string>
+  <key>LSMinimumSystemVersion</key><string>11.0</string>
   <key>NSHighResolutionCapable</key><true/>
   <key>NSAppleEventsUsageDescription</key>
   <string>Để thoát các app tài khoản khi bạn bấm nút Thoát.</string>

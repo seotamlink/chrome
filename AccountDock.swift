@@ -14,8 +14,8 @@ import WebKit
 
 let HOME = FileManager.default.homeDirectoryForCurrentUser
 let APPS = URL(fileURLWithPath: "/Applications")
-let CHROME_DATA = HOME.appending(path: "Library/Application Support/Google/Chrome")
-let TG_NATIVE = HOME.appending(path: "Library/Group Containers/6N38VWS5BX.ru.keepcoder.Telegram/appstore")
+let CHROME_DATA = HOME.appendingPathComponent("Library/Application Support/Google/Chrome")
+let TG_NATIVE = HOME.appendingPathComponent("Library/Group Containers/6N38VWS5BX.ru.keepcoder.Telegram/appstore")
 
 @discardableResult
 func sh(_ launch: String, _ args: [String], timeout: TimeInterval = 60) -> String {
@@ -44,7 +44,7 @@ func sh(_ launch: String, _ args: [String], timeout: TimeInterval = 60) -> Strin
 }
 
 func infoPlist(_ app: URL) -> [String: Any] {
-    let u = app.appending(path: "Contents/Info.plist")
+    let u = app.appendingPathComponent("Contents/Info.plist")
     guard let d = try? Data(contentsOf: u),
           let o = try? PropertyListSerialization.propertyList(from: d, format: nil) as? [String: Any]
     else { return [:] }
@@ -118,7 +118,7 @@ func runningApp(_ bundleID: String?) -> NSRunningApplication? {
 
 /// Email + tên profile từ một user-data-dir của Chrome.
 func chromeAccount(_ dataDir: URL) -> (String?, String?) {
-    let pref = dataDir.appending(path: "Default/Preferences")
+    let pref = dataDir.appendingPathComponent("Default/Preferences")
     guard let d = try? Data(contentsOf: pref),
           let o = try? JSONSerialization.jsonObject(with: d) as? [String: Any]
     else { return (nil, nil) }
@@ -133,13 +133,13 @@ func chromeAccount(_ dataDir: URL) -> (String?, String?) {
 /// `user_data` ngay lần chạy đầu dù chưa login — key_datas/usertag giống hệt nhau
 /// ở cả bản đã login lẫn bản trắng.
 func telegramSlots(_ workdir: URL) -> Int {
-    let tdata = workdir.appending(path: "tdata")
+    let tdata = workdir.appendingPathComponent("tdata")
     let items = (try? FileManager.default.contentsOfDirectory(atPath: tdata.path)) ?? []
     return items.filter { $0.hasPrefix("user_data") }.count
 }
 
 func chromeProfiles() -> [[String: Any]] {
-    let ls = CHROME_DATA.appending(path: "Local State")
+    let ls = CHROME_DATA.appendingPathComponent("Local State")
     guard let d = try? Data(contentsOf: ls),
           let o = try? JSONSerialization.jsonObject(with: d) as? [String: Any],
           let cache = (o["profile"] as? [String: Any])?["info_cache"] as? [String: Any]
@@ -168,7 +168,7 @@ func isPinned(_ appPath: String, in dock: String) -> Bool {
 
 /// App clone thì tự dò được. Còn tài khoản người dùng tự thêm (Facebook, Shopee, …)
 /// phải lưu lại. Ghi atomic để tắt app giữa chừng không hỏng file.
-let STORE = HOME.appending(path: "Library/Application Support/AccountDock/accounts.json")
+let STORE = HOME.appendingPathComponent("Library/Application Support/AccountDock/accounts.json")
 
 /// Cả file: { "accounts": [...], "overrides": { "<id>": {name, identifier, note} } }
 /// `accounts` là tài khoản tự thêm. `overrides` là tên do người dùng đặt cho
@@ -263,8 +263,8 @@ func groupOf(_ service: String) -> String {
 // MARK: - Quét trạng thái
 
 let WRAPPERS = ["chrome-wrapper": "google", "tg-wrapper": "telegram"]
-let BASE_APP = ["google": APPS.appending(path: "Google Chrome.app"),
-                "telegram": APPS.appending(path: "Telegram.app")]
+let BASE_APP = ["google": APPS.appendingPathComponent("Google Chrome.app"),
+                "telegram": APPS.appendingPathComponent("Telegram.app")]
 
 func scan() -> [String: Any] {
     let pinned = dockPinned()
@@ -275,14 +275,14 @@ func scan() -> [String: Any] {
 
     let all = (try? fm.contentsOfDirectory(atPath: APPS.path))?.sorted() ?? []
     for entry in all where entry.hasSuffix(".app") {
-        let app = APPS.appending(path: entry)
+        let app = APPS.appendingPathComponent(entry)
         guard let wrapper = WRAPPERS.keys.first(where: {
-            fm.fileExists(atPath: app.appending(path: "Contents/MacOS/\($0)").path)
+            fm.fileExists(atPath: app.appendingPathComponent("Contents/MacOS/\($0)").path)
         }) else { continue }
 
         let group = WRAPPERS[wrapper]!
         let name = String(entry.dropLast(4))
-        let wtext = (try? String(contentsOf: app.appending(path: "Contents/MacOS/\(wrapper)"),
+        let wtext = (try? String(contentsOf: app.appendingPathComponent("Contents/MacOS/\(wrapper)"),
                                 encoding: .utf8)) ?? ""
 
         var dataDir: URL? = nil
@@ -340,7 +340,7 @@ func scan() -> [String: Any] {
         if group == "google" {
             handle = "nhiều profile"; sub = "\(chromeProfiles().count) profile"
         } else {
-            dd = HOME.appending(path: "Library/Application Support/Telegram Desktop")
+            dd = HOME.appendingPathComponent("Library/Application Support/Telegram Desktop")
             handle = "\(telegramSlots(dd)) slot tài khoản"
         }
         var it: [String: Any] = [
@@ -359,7 +359,7 @@ func scan() -> [String: Any] {
     }
 
     // Telegram native — sandboxed, không tách được
-    let native = APPS.appending(path: "Telegram.localized/Telegram.app")
+    let native = APPS.appendingPathComponent("Telegram.localized/Telegram.app")
     if fm.fileExists(atPath: native.path) {
         let n = ((try? fm.contentsOfDirectory(atPath: TG_NATIVE.path)) ?? [])
             .filter { $0.hasPrefix("account-") }.count
@@ -540,7 +540,7 @@ final class Bridge: NSObject, WKScriptMessageHandler {
             let script = ["google": "build_chrome_apps.sh",
                           "telegram": "build_telegram_apps.sh"][group]
             guard let script else { return reply(id, ["ok": false, "error": "nhóm không hợp lệ"]) }
-            let path = scriptDir.appending(path: script).path
+            let path = scriptDir.appendingPathComponent(script).path
             guard FileManager.default.fileExists(atPath: path) else {
                 return reply(id, ["ok": false, "error": "không thấy \(script) cạnh app"])
             }
@@ -566,8 +566,8 @@ final class Delegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     func applicationDidFinishLaunching(_ n: Notification) {
         // Script build nằm cạnh app, hoặc trong Resources của bundle
         var dir = Bundle.main.bundleURL.deletingLastPathComponent()
-        let inRes = Bundle.main.bundleURL.appending(path: "Contents/Resources")
-        if FileManager.default.fileExists(atPath: inRes.appending(path: "build_chrome_apps.sh").path) {
+        let inRes = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources")
+        if FileManager.default.fileExists(atPath: inRes.appendingPathComponent("build_chrome_apps.sh").path) {
             dir = inRes
         }
         bridge = Bridge(scriptDir: dir)

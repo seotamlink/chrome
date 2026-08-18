@@ -25,6 +25,7 @@ mkdir -p "$DIST"
 # --- 1. Chuẩn bị nội dung ------------------------------------------------
 STAGE="$TMP/stage"; mkdir -p "$STAGE/.background"
 cp -R "$APP" "$STAGE/"
+[ -f "$SRCDIR/chan_doan.sh" ] && cp "$SRCDIR/chan_doan.sh" "$STAGE/" && chmod +x "$STAGE/chan_doan.sh"
 ln -s /Applications "$STAGE/Applications"
 STAGED="$STAGE/$NAME.app"
 
@@ -58,6 +59,18 @@ VÌ SAO PHẢI LÀM BƯỚC 2
 
   App KHÔNG hỏng. Lệnh trên chỉ gỡ cờ. ĐỪNG bấm "Move to Trash".
   Mẹo chuột phải > Open không còn tác dụng với app ad-hoc trên macOS mới.
+
+  Lưu ý: phải kéo app vào /Applications TRƯỚC, rồi mới chạy lệnh.
+  Chạy lệnh khi app còn nằm trong Downloads hoặc trong cửa sổ DMG là vô ích.
+
+NẾU VẪN KHÔNG MỞ ĐƯỢC
+  Cách 1 — System Settings > Privacy & Security, kéo xuống cuối, bấm
+           "Open Anyway" ở dòng nhắc về Account Dock. (macOS 15/26 dùng cách này
+           thay cho mẹo chuột phải cũ.)
+
+  Cách 2 — Chạy file chan_doan.sh kèm trong cửa sổ này để biết lý do thật:
+             bash "/Volumes/$VOL/chan_doan.sh"
+           Rồi chụp kết quả gửi lại.
 
 YÊU CẦU   macOS 13+ · $ARCHS
 

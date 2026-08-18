@@ -109,8 +109,12 @@ hai app dùng chung một key sẽ đăng xuất chéo nhau. Mỗi app phải đ
 ## Gửi cho người khác
 
 ```bash
-./make_dist.sh    # -> dist/AccountDock-<ver>.zip  (~276 KB, universal arm64 + x86_64)
+./make_dmg.sh     # -> dist/AccountDock-<ver>.dmg  (~312 KB) — khuyên dùng
+./make_dist.sh    # -> dist/AccountDock-<ver>.zip  (~280 KB) — nếu cần file zip
 ```
+
+DMG mở ra là thấy icon app, mũi tên, và thư mục Applications — kéo sang là cài xong,
+đúng kiểu quen thuộc trên macOS. Cả hai đều universal (`arm64` + `x86_64`).
 
 Script tự gỡ file `.conf` khỏi bundle rồi quét lại; còn sót email là nó **dừng, không đóng gói**.
 
@@ -136,7 +140,9 @@ Không có đường vòng.
 | `build_chrome_apps.sh` | Tách tài khoản Chrome thành app riêng |
 | `build_telegram_apps.sh` | Tách Telegram Desktop |
 | `build_dashboard_app.sh` | Compile + đóng gói `Account Dock.app` (universal) |
-| `make_dist.sh` | Đóng gói zip để chia sẻ |
+| `make_dmg.sh` | Đóng gói `.dmg` để chia sẻ (khuyên dùng) |
+| `make_dist.sh` | Đóng gói `.zip` để chia sẻ |
+| `make_dmg_bg.swift` | Vẽ ảnh nền cửa sổ DMG |
 | `AccountDock.swift` | App quản lý: quét trạng thái + cầu nối JS↔Swift |
 | `AccountDockHTML.swift` | Giao diện (HTML/CSS/JS) — sửa giao diện ở đây |
 | `make_icon.swift` | Ghép logo app + avatar thành icon badge |

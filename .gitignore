@@ -1,0 +1,10 @@
+# Cấu hình riêng của từng máy — chứa tên tài khoản, KHÔNG commit
+*.conf
+
+# Sản phẩm build
+dist/
+*.app/
+
+# Rác hệ thống
+.DS_Store
+__pycache__/

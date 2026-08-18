@@ -72,6 +72,26 @@ for spec in "${APPS[@]}"; do
 
   echo "=== $NAME ==="
 
+
+  # Nếu app đã tồn tại và đang trỏ tới thư mục dữ liệu KHÁC thì cảnh báo.
+  # Không có bước này, chỉ cần đổi suffix (hoặc chạy script khi thiếu file conf,
+  # lúc đó suffix tự sinh theo email) là app âm thầm chuyển sang thư mục mới
+  # và bỏ rơi toàn bộ dữ liệu cũ — nhìn như mất sạch tài khoản.
+  if [ -f "$APP/Contents/MacOS/tg-wrapper" ]; then
+    # `--` bắt buộc: mẫu bắt đầu bằng '-' sẽ bị grep hiểu nhầm là tham số.
+    # `|| true` vì set -e + pipefail: grep không khớp là script chết.
+    OLD=$(grep -o -- '-workdir "[^"]*"' "$APP/Contents/MacOS/tg-wrapper" 2>/dev/null | sed 's/.*"\(.*\)"/\1/' | head -1 || true)
+    if [ -n "$OLD" ] && [ "$OLD" != "$WORKDIR" ] && [ -d "$OLD" ]; then
+      echo "  ⚠ CẢNH BÁO: '$NAME' đang dùng dữ liệu ở:"
+      echo "      $OLD"
+      echo "    Lần build này sẽ chuyển sang:"
+      echo "      $WORKDIR"
+      echo "    Dữ liệu cũ KHÔNG bị xoá, nhưng app sẽ không dùng tới nữa."
+      echo "    Muốn giữ nguyên: đặt suffix '$(basename "$OLD" | sed 's/^[A-Za-z]*-//')' trong $(basename "$CONF")"
+      echo
+    fi
+  fi
+
   pkill -f "MacOS/$NAME" 2>/dev/null || true
   sleep 1
   rm -rf "$APP"
